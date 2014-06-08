@@ -398,7 +398,7 @@ request = request % 3;
 int main()
 {
  comm = new communication();
- fd = comm->serialport_init("/dev/ttyUSB1",115200);
+ fd = comm->serialport_init("/dev/ttyUSB0",115200);
 
  //receive_loop();
  while(1)
