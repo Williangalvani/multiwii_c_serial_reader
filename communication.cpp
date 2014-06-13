@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <stdio.h>
-
+#include <sys/ioctl.h>
 #include <string.h>   /* String function definitions */
 #include <unistd.h>   /* UNIX standard function definitions */
 
@@ -79,7 +79,7 @@ int communication::serialport_init(char *serialport, int baud) {
 	toptions.c_oflag &= ~OPOST; // make raw
 
 	// see: http://unixwiz.net/techtips/termios-vmin-vtime.html
-	toptions.c_cc[VMIN] = 0;
+	toptions.c_cc[VMIN] = 1;
 	toptions.c_cc[VTIME] = 10;
 	if (tcsetattr(fd, TCSANOW, &toptions) < 0) {
 		perror("init_serialport: Couldn't set term attributes");
@@ -142,15 +142,16 @@ char communication::serialport_read(int fd) {
 	return b[0];
 }
 
-int communication::serialport_available(int fd,char* b) {
+int communication::serialport_available(int fd) {
         
-        int n = read(fd, b, 1);  // read a char at a time
-        if (n < 1){
-//              printf("erro ao ler serial\n");
-//              return -1;    // couldn't read
-       return 0;
-      }
-        return 1;
+int nbytes = 0;
+ioctl(fd, FIONREAD, &nbytes);
+//if (nbytes)
+//{
+//printf("[%d]",nbytes);
+//}
+return nbytes;
+
 }
 
 

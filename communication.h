@@ -31,7 +31,7 @@ public:
 	int serialport_write(int fd, const char* str);
 	int serialport_read_until(int fd, char buf[10][20], char until);
 	char serialport_read(int fd);
-        int serialport_available(int fd, char* c);
+        int serialport_available(int fd);
 };
 
 #endif /* COMMUNICATION_H_ */

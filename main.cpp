@@ -2,6 +2,8 @@
 #include <termios.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <time.h>
+
 #define USE_SERIAL_OUT_BUFFER
 
 /************************************** MultiWii Serial Protocol *******************************************************/
@@ -304,8 +306,8 @@ void receive_loop()
  char c = 12;
 char ok= -1;
  blankserialRequest(MSP_ATTITUDE);
- while(ok = comm->serialport_available(fd,&c)){
-   //comm->serialport_available(fd,&c);
+ while(comm->serialport_available(fd)){
+   c = comm->serialport_read(fd);
  
    printf("%d ok: %d\n",c, ok);
  }
@@ -318,10 +320,10 @@ void serialMSPreceive()
     char c;
     //int available = 0;
     //while (UCSR0A & (1 << RXC0))
-    while (comm->serialport_available(fd,&c))
+    while (comm->serialport_available(fd))
     {
 	//comm->available(fd,&c);
-        //c = comm->serialport_read(fd);
+        c = comm->serialport_read(fd);
         //printf("%c",c);
     
         //#c = comm->serialport_read(fd);
@@ -397,12 +399,43 @@ request = request % 3;
 
 int main()
 {
- comm = new communication();
+ communication* comm = new communication();
+// fd = comm->serialport_init("/dev/ttyUSB0",115200);
  fd = comm->serialport_init("/dev/ttyUSB0",115200);
+ //SerialBegin();
 
+  struct timespec last_time, current_time;
+  clock_gettime(CLOCK_MONOTONIC ,&last_time);
+  /* start after one second */
+ usleep(5000000);
+ char c = 0;/*
+ while(1)
+ {
+  clock_gettime(CLOCK_MONOTONIC ,&current_time);
+  if ( current_time.tv_sec > last_time.tv_sec || current_time.tv_nsec > last_time.tv_nsec+500000)
+  {
+    clock_gettime(CLOCK_MONOTONIC ,&last_time); 
+    printf("requesting data\n");
+    requestData();
+  }
+  //printf("%d chars avaialble\n",comm->serialport_available(fd)); 
+  while(comm->serialport_available(fd))
+  {
+   //printf("[%d]",comm->serialport_available(fd));
+    c= comm->serialport_read(fd);
+    //printf("%c",c);}
+  }*/
  //receive_loop();
  while(1)
  {
+    clock_gettime(CLOCK_MONOTONIC ,&current_time);
+  if ( current_time.tv_sec > last_time.tv_sec || current_time.tv_nsec > last_time.tv_nsec+50000000)
+  {
+    clock_gettime(CLOCK_MONOTONIC ,&last_time); 
+    printf("requesting data\n");
+    requestData();
+  }
+
   requestData();
   char rec; // comm->serialport_read(fd);
   //comm->available(fd,&rec);
@@ -412,12 +445,10 @@ int main()
   {
     serialMSPCheck();
   }
-
+/*
   if (received_messages >=100)
   {
     return 0;
-  }
+  }*/
  }
 }
-
-
